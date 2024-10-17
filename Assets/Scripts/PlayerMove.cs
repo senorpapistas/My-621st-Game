@@ -83,7 +83,7 @@ public class PlayerMove : MonoBehaviour
 
         if (isJumping)
         {
-            yVelocity += .05f;
+            yVelocity += .03f;
             yVelocityMax -= .05f;
         }
 
