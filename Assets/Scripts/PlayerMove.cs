@@ -7,22 +7,30 @@ public class PlayerMove : MonoBehaviour
 {
     public LayerMask groundLayer;
 
-    public float speed;
     CharacterController characterController;
     private Vector3 move;
+
+    [Header("Speed")]
+    public float speed;
+
+    [Header("States")]
     public bool isGrounded;
     public bool isJumping;
 
+    [Header("Jumping")]
     public float jumpHeight;
     public float gravityValue;
     public float yVelocity;
+    float yVelocityMax;
 
-    //cam
+    [Header("Camera")]
     public float xsens = 400;
     public float ysens = 400;
 
     float xRotation;
     float yRotation;
+
+    public GameObject cameraPosParent;
 
     // Start is called before the first frame update
     void Start()
@@ -37,15 +45,7 @@ public class PlayerMove : MonoBehaviour
         MoveCheck();
         JumpCheck();
         GravityCheck();
-
-        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * xsens;
-        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * ysens;
-
-        yRotation += mouseX;
-        xRotation -= mouseY;
-
-        xRotation = Mathf.Clamp(xRotation, -25f, 90f);
-        transform.rotation = Quaternion.Euler(0, yRotation, 0);
+        RotationCheck();
     }
 
     void CheckGrounded()
@@ -66,21 +66,36 @@ public class PlayerMove : MonoBehaviour
 
     void MoveCheck()
     {
-        //move = new Vector3 (Input.GetAxis("Horizontal"), 0, Input.GetAxis("Vertical"));
         move = Input.GetAxis("Vertical") * transform.forward + Input.GetAxis("Horizontal") * transform.right;
         characterController.Move(move * speed * Time.deltaTime);
     }
 
     void JumpCheck()
     {
+        if (isGrounded) { yVelocity = 0f; }
+
         if (isGrounded && Input.GetButtonDown("Jump"))
         {
             Debug.Log("jumping");
-            //yVelocity += jumpHeight;
             isJumping = true;
-            yVelocity += jumpHeight;
+            yVelocityMax = jumpHeight;
         }
 
+        if (isJumping)
+        {
+            yVelocity += .05f;
+            yVelocityMax -= .05f;
+        }
+
+        if (isGrounded && !isJumping)
+        {
+            isJumping = false;
+        }
+
+        if (yVelocityMax <= 0)
+        {
+            isJumping = false;
+        }
     }
 
     void GravityCheck()
@@ -88,8 +103,22 @@ public class PlayerMove : MonoBehaviour
 
         if (!isGrounded) 
         {
-            yVelocity = gravityValue * Time.deltaTime;
+            yVelocity += gravityValue * Time.deltaTime;
         }
             characterController.Move(new Vector3(0, yVelocity, 0));
+    }
+
+    void RotationCheck()    //rotates player and camera pos parent
+    {
+        float mouseX = Input.GetAxisRaw("Mouse X") * Time.deltaTime * xsens;
+        float mouseY = Input.GetAxisRaw("Mouse Y") * Time.deltaTime * ysens;
+
+        yRotation += mouseX;
+        xRotation -= mouseY;
+
+        xRotation = Mathf.Clamp(xRotation, -15f, 80f);
+        this.gameObject.transform.rotation = Quaternion.Euler(0, yRotation, 0);
+
+        cameraPosParent.transform.rotation = Quaternion.Euler(xRotation, yRotation, 0);
     }
 }
