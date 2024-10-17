@@ -32,8 +32,9 @@ public class Flower : MonoBehaviour
 
     private void wearHat(Transform playerTransform)
     {
-        transform.SetParent(playerTransform);
-        transform.localScale = playerTransform.localScale; // match the same scale as the player
+        Transform bluePikminTransform = playerTransform.Find("Blue Pikmin");
+        transform.SetParent(bluePikminTransform);
+        //transform.localScale = playerTransform.localScale; // match the same scale as the player
         transform.localRotation = playerTransform.localRotation;
         transform.localPosition = new Vector3(0, 21f, 0);
     }
